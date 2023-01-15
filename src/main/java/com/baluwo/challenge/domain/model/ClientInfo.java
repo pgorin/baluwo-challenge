@@ -37,4 +37,10 @@ public class ClientInfo {
         return Objects.hash(name);
     }
 
+    @Override
+    public String toString() {
+        return "ClientInfo{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

@@ -5,16 +5,12 @@ import com.baluwo.challenge.domain.persistence.impl.OfferList;
 import com.baluwo.challenge.domain.persistence.impl.ProductInventory;
 import com.baluwo.challenge.domain.persistence.impl.SellerList;
 import com.baluwo.challenge.domain.service.impl.ProductServiceImpl;
-import com.google.common.collect.Lists;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.Collection;
-import java.util.HashSet;
 
 import static com.baluwo.challenge.domain.model.Products.iphone11;
 import static com.baluwo.challenge.domain.model.Products.playstation5;

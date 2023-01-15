@@ -122,11 +122,6 @@ public class ClientController {
                                             schema = @Schema(implementation = Iterable.class)
                                     )
                             }
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Client not found",
-                            content = @Content
                     )
             }
     )

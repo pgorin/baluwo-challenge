@@ -27,4 +27,10 @@ public class Price {
         return amount;
     }
 
+    @Override
+    public String toString() {
+        return "Price{" +
+                "amount=" + amount +
+                '}';
+    }
 }

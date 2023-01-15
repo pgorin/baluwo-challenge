@@ -143,11 +143,6 @@ public class SellerController {
                                             schema = @Schema(implementation = Seller.class)
                                     )
                             }
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Seller not found",
-                            content = @Content
                     )
             }
     )

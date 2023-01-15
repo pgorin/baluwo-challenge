@@ -196,8 +196,8 @@ public class ProductController {
         logger.info(format("Adding new offer for product %s and seller %s...", product, seller));
         return service.offer(product, seller, price)
                 .map(offer -> status(CREATED).body((Object) offer))
-                .recover(ProductNotFound.class, notFound().build())
-                .recover(SellerNotFound.class, badRequest().body("Seller not found"))
+                .recover(ProductNotFound.class, ex -> notFound().build())
+                .recover(SellerNotFound.class, ex -> badRequest().body(ex.getCause()))
                 .recover(ProductAlreadyOffered.class, ex -> status(CONFLICT).body(ex.getCause()))
                 .getOrElseGet(ex -> status(INTERNAL_SERVER_ERROR).body(ex.getCause()));
     }
@@ -214,11 +214,6 @@ public class ProductController {
                                             schema = @Schema(implementation = Iterable.class)
                                     )
                             }
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Product not found",
-                            content = @Content
                     )
             }
     )

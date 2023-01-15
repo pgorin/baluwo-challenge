@@ -8,12 +8,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "offers")
-public class Offer {
+@Table(name = "order_offers")
+public class OrderOffer implements Serializable {
 
     @Embeddable
     public static class Id implements Serializable {
 
+        @Column(name = "order_id")
+        private UUID orderId;
         @Column(name = "seller_id")
         private UUID sellerId;
         @Column(name = "product_id")
@@ -23,32 +25,36 @@ public class Offer {
         private Id() {
         }
 
-        public Id(UUID sellerId, UUID productId) {
+        public Id(UUID orderId, UUID sellerId, UUID productId) {
+            this.orderId = orderId;
             this.sellerId = sellerId;
             this.productId = productId;
         }
 
-        public Id(Seller seller, Product product) {
-            this(seller.id(), product.id());
+        public Id(Order order, Seller seller, Product product) {
+            this(order.id(), seller.id(), product.id());
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Id id = (Id) o;
-            return sellerId.equals(id.sellerId) && productId.equals(id.productId);
+            Id that = (Id) o;
+            return orderId.equals(that.orderId) && sellerId.equals(that.sellerId) && productId.equals(that.productId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(sellerId, productId);
+            return Objects.hash(orderId, sellerId, productId);
         }
-    }
 
+    }
 
     @EmbeddedId
     private Id id;
+    @ManyToOne
+    @MapsId("order_id")
+    private Order order;
     @ManyToOne
     @MapsId("seller_id")
     @JsonProperty
@@ -60,20 +66,24 @@ public class Offer {
     @Embedded
     @JsonProperty
     private Price price;
+    @Column(nullable = false)
+    @JsonProperty
+    private Integer quantity;
 
-    // required due reflection
-    private Offer() {
+    private OrderOffer() {
     }
 
-    public Offer(Seller seller, Product product, Price price) {
-        this.id = new Id(seller, product);
-        this.seller = seller;
-        this.product = product;
-        this.price = price;
+    public OrderOffer(Order order, Offer offer, Integer quantity) {
+        this.id = new Id(order, offer.seller(), offer.product());
+        this.order = order;
+        this.seller = offer.seller();
+        this.product = offer.product();
+        this.price = offer.price();
+        this.quantity = quantity;
     }
 
-    public Id id() {
-        return id;
+    public Order order() {
+        return order;
     }
 
     public Seller seller() {
@@ -88,25 +98,18 @@ public class Offer {
         return price;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Offer offer = (Offer) o;
-        return id.equals(offer.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public Integer quantity() {
+        return quantity;
     }
 
     @Override
     public String toString() {
-        return "Offer{" +
-                "seller=" + seller +
+        return "OrderOffer{" +
+                "id=" + id +
+                ", seller=" + seller +
                 ", product=" + product +
                 ", price=" + price +
+                ", quantity=" + quantity +
                 '}';
     }
 }

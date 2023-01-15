@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.UUID;
 
 import static io.vavr.API.For;
@@ -77,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
         return (Try<Offer>) For(ofOptional(inventory.findById(productId)))
                 .yield(product ->
                         For(ofOptional(sellers.findById(sellerId))).yield(seller ->
-                                For(ofOptional(offers.findById(new OfferId(seller, product))))
+                                For(ofOptional(offers.findById(new Offer.Id(seller, product))))
                                         .yield()
                                         .fold(
                                                 () -> {
@@ -88,15 +87,15 @@ public class ProductServiceImpl implements ProductService {
                                                 offer -> failure(new ProductAlreadyOffered(offer))
                                         )
 
-                        ).getOrElse(failure(new SellerNotFound()))
-                ).getOrElse(failure(new ProductNotFound()));
+                        ).getOrElse(failure(new SellerNotFound(sellerId)))
+                ).getOrElse(failure(new ProductNotFound(productId)));
     }
 
     @Override
     public Try<Iterable<Offer>> offers(UUID productId) {
         return find(productId)
                 .map(product -> success(offers.findAllForProduct(product.id())))
-                .getOrElse(failure(new ProductNotFound()));
+                .getOrElse(failure(new ProductNotFound(productId)));
     }
 
 }

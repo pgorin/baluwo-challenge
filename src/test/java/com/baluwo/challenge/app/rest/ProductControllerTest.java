@@ -195,7 +195,7 @@ public class ProductControllerTest {
 
     @Test
     public void offersCannotBeListedIfProductNotExists() {
-        when(service.offers(iphone11.id())).thenReturn(failure(new ProductNotFound()));
+        when(service.offers(iphone11.id())).thenReturn(failure(new ProductNotFound(iphone11.id())));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         get(create(format("/products/%s/offers", iphone11.id())))

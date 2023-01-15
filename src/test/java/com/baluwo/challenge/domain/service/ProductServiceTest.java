@@ -1,26 +1,25 @@
 package com.baluwo.challenge.domain.service;
 
-import com.baluwo.challenge.domain.model.Offer;
-import com.baluwo.challenge.domain.model.Price;
-import com.baluwo.challenge.domain.model.Product;
-import com.baluwo.challenge.domain.model.ProductDetails;
+import com.baluwo.challenge.domain.model.*;
 import com.baluwo.challenge.domain.persistence.impl.OfferList;
 import com.baluwo.challenge.domain.persistence.impl.ProductInventory;
 import com.baluwo.challenge.domain.persistence.impl.SellerList;
 import com.baluwo.challenge.domain.service.impl.ProductServiceImpl;
+import com.google.common.collect.Lists;
 import io.vavr.control.Option;
+import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 
 import static com.baluwo.challenge.domain.model.Products.iphone11;
 import static com.baluwo.challenge.domain.model.Products.playstation5;
 import static com.baluwo.challenge.domain.model.Sellers.apple;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,7 +78,7 @@ public class ProductServiceTest {
     public void productsCanBeListed() {
         inventory.save(playstation5);
         inventory.save(iphone11);
-        assertEquals(newHashSet(playstation5, iphone11), new HashSet<>((Collection<Product>) service.list()));
+        assertEquals(newHashSet(playstation5, iphone11), newHashSet(service.list()));
     }
 
     @Test
@@ -96,7 +95,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    public void productOfferShouldBeAddedIfNotAlreadyExists() {
+    public void offerShouldBeAddedIfNotAlreadyExists() {
         inventory.save(iphone11);
         sellers.save(apple);
         Offer added = service.offer(iphone11.id(), apple.id(), new Price(100)).get();
@@ -104,11 +103,39 @@ public class ProductServiceTest {
     }
 
     @Test
-    public void productOffersCanBeListed() {
+    public void offerShouldFailIfProductNotExists() {
+        sellers.save(apple);
+        Try<Throwable> failure = service.offer(iphone11.id(), apple.id(), new Price(100)).failed();
+        assertTrue(failure.exists(ex -> ex instanceof ProductNotFound));
+    }
+
+    @Test
+    public void offerShouldFailIfSellerNotExists() {
+        inventory.save(iphone11);
+        Try<Throwable> failure = service.offer(iphone11.id(), apple.id(), new Price(100)).failed();
+        assertTrue(failure.exists(ex -> ex instanceof SellerNotFound));
+    }
+
+    @Test
+    public void offerShouldFailIfAlreadyExists() {
+        inventory.save(iphone11);
+        sellers.save(apple);
+        service.offer(iphone11.id(), apple.id(), new Price(100));
+        Try<Throwable> failure = service.offer(iphone11.id(), apple.id(), new Price(200)).failed();
+        assertTrue(failure.exists(ex -> ex instanceof ProductAlreadyOffered));
+    }
+
+    @Test
+    public void offersCanBeListedIfProductExists() {
         inventory.save(iphone11);
         sellers.save(apple);
         Offer offer = offers.save(new Offer(apple, iphone11, new Price(100)));
-        assertTrue(service.offers(iphone11.id()).contains(newHashSet(offer)));
+        assertTrue(service.offers(iphone11.id()).contains(newArrayList(offer)));
+    }
+
+    @Test
+    public void offersCannotBeListedIfProductNotExists() {
+        assertTrue(service.offers(iphone11.id()).failed().exists(ex -> ex instanceof ProductNotFound));
     }
 
     @AfterEach

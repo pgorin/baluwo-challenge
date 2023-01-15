@@ -4,6 +4,7 @@ import com.baluwo.challenge.domain.model.Client;
 import com.baluwo.challenge.domain.model.ClientInfo;
 import com.baluwo.challenge.domain.persistence.impl.ClientList;
 import com.baluwo.challenge.domain.service.impl.ClientServiceImpl;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 
 import static com.baluwo.challenge.domain.model.Clients.kunAguero;
 import static com.baluwo.challenge.domain.model.Clients.leoMessi;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest()
 public class ClientServiceTest {
@@ -42,28 +41,28 @@ public class ClientServiceTest {
     @Test
     public void clientCanBeUpdatedIfExists() {
         list.save(leoMessi);
-        Optional<Client> maybeUpdated = service.update(leoMessi.id(), new ClientInfo(kunAguero.name()));
-        assertEquals(list.findById(leoMessi.id()), maybeUpdated);
+        Option<Client> maybeUpdated = service.update(leoMessi.id(), new ClientInfo(kunAguero.name()));
+        assertEquals(list.findById(leoMessi.id()), maybeUpdated.toJavaOptional());
     }
 
     @Test
     public void clientCannotBeUpdatedIfNotExists() {
-        Optional<Client> maybeUpdated = service.update(leoMessi.id(), new ClientInfo(kunAguero.name()));
-        assertFalse(maybeUpdated.isPresent());
+        Option<Client> maybeUpdated = service.update(leoMessi.id(), new ClientInfo(kunAguero.name()));
+        assertTrue(maybeUpdated.isEmpty());
     }
 
     @Test
     public void clientCanBeRemovedIfExists() {
         list.save(leoMessi);
-        Optional<Client> maybeRemoved = service.remove(leoMessi.id());
-        assertThat(maybeRemoved).hasValue(leoMessi);
+        Option<Client> maybeRemoved = service.remove(leoMessi.id());
+        assertTrue(maybeRemoved.contains(leoMessi));
         assertFalse(list.findById(leoMessi.id()).isPresent());
     }
 
     @Test
     public void clientCannotBeRemovedIfNotExists() {
-        Optional<Client> maybeRemoved = service.remove(leoMessi.id());
-        assertFalse(maybeRemoved.isPresent());
+        Option<Client> maybeRemoved = service.remove(leoMessi.id());
+        assertTrue(maybeRemoved.isEmpty());
     }
 
     @Test
@@ -76,14 +75,14 @@ public class ClientServiceTest {
     @Test
     public void clientShouldBeFoundIfExists() {
         list.save(leoMessi);
-        Optional<Client> maybeClient = service.find(leoMessi.id());
-        assertEquals(list.findById(leoMessi.id()), maybeClient);
+        Option<Client> maybeClient = service.find(leoMessi.id());
+        assertEquals(list.findById(leoMessi.id()), maybeClient.toJavaOptional());
     }
 
     @Test
     public void clientShouldBeMissingIfNotExists() {
-        Optional<Client> maybeClient = service.find(leoMessi.id());
-        assertFalse(maybeClient.isPresent());
+        Option<Client> maybeClient = service.find(leoMessi.id());
+        assertTrue(maybeClient.isEmpty());
     }
 
     @AfterEach

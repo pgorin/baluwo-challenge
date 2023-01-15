@@ -16,12 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.ResponseEntity.*;
 
 @RestController
 @RequestMapping(path = "/clients")
@@ -52,9 +51,8 @@ public class ClientController {
     )
     @PostMapping()
     public ResponseEntity<?> add(@RequestBody ClientInfo info) throws JsonProcessingException {
-        logger.info("Registering new client...");
-        Client added = service.add(info);
-        return new ResponseEntity<>(added, CREATED);
+        logger.info("Adding new client...");
+        return status(CREATED).body(service.add(info));
     }
 
     @Operation(summary = "Update client info by its id")
@@ -82,8 +80,7 @@ public class ClientController {
                                     @Parameter(description = "Id of the client to be updated") UUID id,
                                     @RequestBody ClientInfo info) {
         logger.info(format("Updating client with id %s...", id));
-        Optional<Client> maybeUpdated = service.update(id, info);
-        return ResponseEntity.of(maybeUpdated);
+        return of(service.update(id, info).toJavaOptional());
     }
 
     @Operation(summary = "Remove client by its id")
@@ -110,8 +107,7 @@ public class ClientController {
     public ResponseEntity<?> remove(@PathVariable("id")
                                     @Parameter(description = "Id of the client to be removed") UUID id) {
         logger.info(format("Removing client with id %s...", id));
-        Optional<Client> maybeRemoved = service.remove(id);
-        return ResponseEntity.of(maybeRemoved);
+        return of(service.remove(id).toJavaOptional());
     }
 
     @Operation(summary = "List all clients")
@@ -137,8 +133,7 @@ public class ClientController {
     @GetMapping()
     public ResponseEntity<?> list() throws JsonProcessingException {
         logger.info("Listing clients...");
-        Iterable<Client> clients = service.list();
-        return new ResponseEntity<>(clients, OK);
+        return ok(service.list());
     }
 
     @Operation(summary = "Get a client by its id")
@@ -153,11 +148,6 @@ public class ClientController {
                                             schema = @Schema(implementation = Client.class)
                                     )
                             }
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Client not found",
-                            content = @Content
                     )
             }
     )
@@ -165,8 +155,7 @@ public class ClientController {
     public ResponseEntity<?> get(@PathVariable("id")
                                  @Parameter(description = "Id of the client to be get") UUID id) {
         logger.info(format("Looking for client with id %s...", id));
-        Optional<Client> maybeClient = service.find(id);
-        return ResponseEntity.of(maybeClient);
+        return of(service.find(id).toJavaOptional());
     }
 
 }

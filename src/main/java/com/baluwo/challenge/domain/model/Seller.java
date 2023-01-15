@@ -55,4 +55,11 @@ public class Seller {
         return Objects.hash(id);
     }
 
+    @Override
+    public String toString() {
+        return "Seller{" +
+                "id=" + id +
+                ", info=" + info +
+                '}';
+    }
 }

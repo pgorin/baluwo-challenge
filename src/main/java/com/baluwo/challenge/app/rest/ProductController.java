@@ -1,7 +1,6 @@
 package com.baluwo.challenge.app.rest;
 
-import com.baluwo.challenge.domain.model.Product;
-import com.baluwo.challenge.domain.model.ProductDetails;
+import com.baluwo.challenge.domain.model.*;
 import com.baluwo.challenge.domain.service.ProductService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,12 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.ResponseEntity.*;
 
 @RestController
 @RequestMapping(path = "/products")
@@ -52,9 +50,8 @@ public class ProductController {
     )
     @PostMapping()
     public ResponseEntity<?> add(@RequestBody ProductDetails details) throws JsonProcessingException {
-        logger.info("Registering new product...");
-        Product added = service.add(details);
-        return new ResponseEntity<>(added, CREATED);
+        logger.info("Adding new product...");
+        return status(CREATED).body(service.add(details));
     }
 
     @Operation(summary = "Update product details by its id")
@@ -82,8 +79,7 @@ public class ProductController {
                                     @Parameter(description = "Id of the product to be updated") UUID id,
                                     @RequestBody ProductDetails details) {
         logger.info(format("Updating product with id %s...", id));
-        Optional<Product> maybeUpdated = service.update(id, details);
-        return ResponseEntity.of(maybeUpdated);
+        return of(service.update(id, details).toJavaOptional());
     }
 
     @Operation(summary = "Remove product by its id")
@@ -110,8 +106,7 @@ public class ProductController {
     public ResponseEntity<?> remove(@PathVariable("id")
                                     @Parameter(description = "Id of the product to be removed") UUID id) {
         logger.info(format("Removing product with id %s...", id));
-        Optional<Product> maybeRemoved = service.remove(id);
-        return ResponseEntity.of(maybeRemoved);
+        return of(service.remove(id).toJavaOptional());
     }
 
     @Operation(summary = "List all products")
@@ -126,19 +121,13 @@ public class ProductController {
                                             schema = @Schema(implementation = Iterable.class)
                                     )
                             }
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Product not found",
-                            content = @Content
                     )
             }
     )
     @GetMapping()
     public ResponseEntity<?> list() throws JsonProcessingException {
         logger.info("Listing products...");
-        Iterable<Product> products = service.list();
-        return new ResponseEntity<>(products, OK);
+        return ok(service.list());
     }
 
     @Operation(summary = "Get a product by its id")
@@ -165,8 +154,82 @@ public class ProductController {
     public ResponseEntity<?> get(@PathVariable("id")
                                  @Parameter(description = "Id of the product to be get") UUID id) {
         logger.info(format("Looking for product with id %s...", id));
-        Optional<Product> maybeProduct = service.find(id);
-        return ResponseEntity.of(maybeProduct);
+        return of(service.find(id).toJavaOptional());
+    }
+
+    @Operation(summary = "Add a new product offer")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Offer",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = Offer.class)
+                                    )
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Product not found",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Seller not found",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "Product already offered",
+                            content = @Content
+                    )
+            }
+    )
+    @PostMapping("{id}/offers")
+    public ResponseEntity<?> offer(@PathVariable("id")
+                                   @Parameter(description = "Id of the offered product") UUID product,
+                                   @RequestParam("seller")
+                                   @Parameter(description = "Id of the offered seller") UUID seller,
+                                   @RequestBody Price price) {
+        logger.info(format("Adding new offer for product %s and seller %s...", product, seller));
+        return service.offer(product, seller, price)
+                .map(offer -> status(CREATED).body((Object) offer))
+                .recover(ProductNotFound.class, notFound().build())
+                .recover(SellerNotFound.class, badRequest().body("Seller not found"))
+                .recover(ProductAlreadyOffered.class, ex -> status(CONFLICT).body(ex.getCause()))
+                .getOrElseGet(ex -> status(INTERNAL_SERVER_ERROR).body(ex.getCause()));
+    }
+
+    @Operation(summary = "List the product offers")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Product offers",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = Iterable.class)
+                                    )
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Product not found",
+                            content = @Content
+                    )
+            }
+    )
+    @GetMapping("{id}/offers")
+    public ResponseEntity<?> offers(@PathVariable("id")
+                                    @Parameter(description = "Id of the offered product") UUID id) {
+        logger.info(format("Listing offers for product with id %s...", id));
+        return service.offers(id)
+                .map(offers -> ok((Object) offers))
+                .recover(ProductNotFound.class, notFound().build())
+                .getOrElseGet(ex -> status(INTERNAL_SERVER_ERROR).body(ex.getCause()));
     }
 
 }

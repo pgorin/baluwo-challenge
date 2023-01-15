@@ -16,12 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.ResponseEntity.*;
 
 @RestController
 @RequestMapping(path = "/sellers")
@@ -52,9 +51,8 @@ public class SellerController {
     )
     @PostMapping()
     public ResponseEntity<?> add(@RequestBody SellerInfo info) throws JsonProcessingException {
-        logger.info("Registering new seller...");
-        Seller added = service.add(info);
-        return new ResponseEntity<>(added, CREATED);
+        logger.info("Adding new seller...");
+        return status(CREATED).body(service.add(info));
     }
 
     @Operation(summary = "Update seller info by its id")
@@ -82,8 +80,7 @@ public class SellerController {
                                     @Parameter(description = "Id of the seller to be updated") UUID id,
                                     @RequestBody SellerInfo info) {
         logger.info(format("Updating seller with id %s...", id));
-        Optional<Seller> maybeUpdated = service.update(id, info);
-        return ResponseEntity.of(maybeUpdated);
+        return of(service.update(id, info).toJavaOptional());
     }
 
     @Operation(summary = "Remove seller by its id")
@@ -110,8 +107,7 @@ public class SellerController {
     public ResponseEntity<?> remove(@PathVariable("id")
                                     @Parameter(description = "Id of the seller to be removed") UUID id) {
         logger.info(format("Removing seller with id %s...", id));
-        Optional<Seller> maybeRemoved = service.remove(id);
-        return ResponseEntity.of(maybeRemoved);
+        return of(service.remove(id).toJavaOptional());
     }
 
     @Operation(summary = "List all sellers")
@@ -126,19 +122,13 @@ public class SellerController {
                                             schema = @Schema(implementation = Iterable.class)
                                     )
                             }
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Seller not found",
-                            content = @Content
                     )
             }
     )
     @GetMapping()
     public ResponseEntity<?> list() throws JsonProcessingException {
         logger.info("Listing sellers...");
-        Iterable<Seller> sellers = service.list();
-        return new ResponseEntity<>(sellers, OK);
+        return ok(service.list());
     }
 
     @Operation(summary = "Get a seller by its id")
@@ -165,8 +155,7 @@ public class SellerController {
     public ResponseEntity<?> get(@PathVariable("id")
                                  @Parameter(description = "Id of the seller to be get") UUID id) {
         logger.info(format("Looking for seller with id %s...", id));
-        Optional<Seller> maybeSeller = service.find(id);
-        return ResponseEntity.of(maybeSeller);
+        return of(service.find(id).toJavaOptional());
     }
 
 }

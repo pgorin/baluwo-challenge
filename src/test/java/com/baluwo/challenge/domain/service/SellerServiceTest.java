@@ -4,6 +4,7 @@ import com.baluwo.challenge.domain.model.Seller;
 import com.baluwo.challenge.domain.model.SellerInfo;
 import com.baluwo.challenge.domain.persistence.impl.SellerList;
 import com.baluwo.challenge.domain.service.impl.SellerServiceImpl;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 
-import static com.baluwo.challenge.domain.model.Sellers.sony;
 import static com.baluwo.challenge.domain.model.Sellers.apple;
+import static com.baluwo.challenge.domain.model.Sellers.sony;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest()
 public class SellerServiceTest {
@@ -42,28 +41,28 @@ public class SellerServiceTest {
     @Test
     public void sellerCanBeUpdatedIfExists() {
         list.save(apple);
-        Optional<Seller> maybeUpdated = service.update(apple.id(), new SellerInfo(sony.name()));
-        assertEquals(list.findById(apple.id()), maybeUpdated);
+        Option<Seller> maybeUpdated = service.update(apple.id(), new SellerInfo(sony.name()));
+        assertEquals(list.findById(apple.id()), maybeUpdated.toJavaOptional());
     }
 
     @Test
     public void sellerCannotBeUpdatedIfNotExists() {
-        Optional<Seller> maybeUpdated = service.update(apple.id(), new SellerInfo(sony.name()));
-        assertFalse(maybeUpdated.isPresent());
+        Option<Seller> maybeUpdated = service.update(apple.id(), new SellerInfo(sony.name()));
+        assertTrue(maybeUpdated.isEmpty());
     }
 
     @Test
     public void sellerCanBeRemovedIfExists() {
         list.save(apple);
-        Optional<Seller> maybeRemoved = service.remove(apple.id());
-        assertThat(maybeRemoved).hasValue(apple);
+        Option<Seller> maybeRemoved = service.remove(apple.id());
+        assertTrue(maybeRemoved.contains(apple));
         assertFalse(list.findById(apple.id()).isPresent());
     }
 
     @Test
     public void sellerCannotBeRemovedIfNotExists() {
-        Optional<Seller> maybeRemoved = service.remove(apple.id());
-        assertFalse(maybeRemoved.isPresent());
+        Option<Seller> maybeRemoved = service.remove(apple.id());
+        assertTrue(maybeRemoved.isEmpty());
     }
 
     @Test
@@ -76,14 +75,14 @@ public class SellerServiceTest {
     @Test
     public void sellerShouldBeFoundIfExists() {
         list.save(apple);
-        Optional<Seller> maybeSeller = service.find(apple.id());
-        assertEquals(list.findById(apple.id()), maybeSeller);
+        Option<Seller> maybeSeller = service.find(apple.id());
+        assertEquals(list.findById(apple.id()), maybeSeller.toJavaOptional());
     }
 
     @Test
     public void sellerShouldBeMissingIfNotExists() {
-        Optional<Seller> maybeSeller = service.find(apple.id());
-        assertFalse(maybeSeller.isPresent());
+        Option<Seller> maybeSeller = service.find(apple.id());
+        assertTrue(maybeSeller.isEmpty());
     }
 
     @AfterEach

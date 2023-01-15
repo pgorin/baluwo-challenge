@@ -2,6 +2,7 @@ package com.baluwo.challenge.app.rest;
 
 import com.baluwo.challenge.domain.model.SellerInfo;
 import com.baluwo.challenge.domain.service.SellerService;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,11 +11,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
-
-import static com.baluwo.challenge.domain.model.Sellers.sony;
 import static com.baluwo.challenge.domain.model.Sellers.apple;
+import static com.baluwo.challenge.domain.model.Sellers.sony;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.vavr.control.Option.none;
 import static java.lang.String.format;
 import static java.net.URI.create;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +33,7 @@ public class SellerControllerTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void sellerShouldBeRegistered() {
+    public void sellerShouldBeAdded() {
         when(service.add(new SellerInfo(apple.name()))).thenReturn(apple);
         ResponseEntity<String> response = restTemplate.exchange(
                 post(create("/sellers"))
@@ -53,7 +53,7 @@ public class SellerControllerTest {
     @Test
     public void sellerCanBeUpdatedIfExists() {
         when(service.update(apple.id(), new SellerInfo(sony.name())))
-                .thenReturn(Optional.of(apple.withInfo(new SellerInfo(sony.name()))));
+                .thenReturn(Option.of(apple.withInfo(new SellerInfo(sony.name()))));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         put(create(format("/sellers/%s", apple.id())))
@@ -72,7 +72,7 @@ public class SellerControllerTest {
 
     @Test
     public void sellerCannotBeUpdatedIfNotExists() {
-        when(service.update(apple.id(), new SellerInfo(sony.name()))).thenReturn(Optional.empty());
+        when(service.update(apple.id(), new SellerInfo(sony.name()))).thenReturn(none());
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         put(create(format("/sellers/%s", apple.id())))
@@ -88,7 +88,7 @@ public class SellerControllerTest {
 
     @Test
     public void sellerCanBeRemovedIfExists() {
-        when(service.remove(apple.id())).thenReturn(Optional.of(apple));
+        when(service.remove(apple.id())).thenReturn(Option.of(apple));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         delete(create(format("/sellers/%s", apple.id())))
@@ -106,7 +106,7 @@ public class SellerControllerTest {
 
     @Test
     public void sellerCannotBeRemovedIfNotExists() {
-        when(service.remove(apple.id())).thenReturn(Optional.empty());
+        when(service.remove(apple.id())).thenReturn(none());
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         delete(create(format("/sellers/%s", apple.id())))
@@ -138,7 +138,7 @@ public class SellerControllerTest {
 
     @Test
     public void sellerShouldBeFoundIfExists() {
-        when(service.find(apple.id())).thenReturn(Optional.of(apple));
+        when(service.find(apple.id())).thenReturn(Option.of(apple));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         get(create(format("/sellers/%s", apple.id()))).accept(APPLICATION_JSON).build(),
@@ -154,7 +154,7 @@ public class SellerControllerTest {
 
     @Test
     public void sellerShouldBeMissingIfNotExists() {
-        when(service.find(apple.id())).thenReturn(Optional.empty());
+        when(service.find(apple.id())).thenReturn(none());
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         get(create(format("/sellers/%s", apple.id()))).accept(APPLICATION_JSON).build(),

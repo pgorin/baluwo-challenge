@@ -2,6 +2,7 @@ package com.baluwo.challenge.app.rest;
 
 import com.baluwo.challenge.domain.model.ClientInfo;
 import com.baluwo.challenge.domain.service.ClientService;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,11 +11,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
-
 import static com.baluwo.challenge.domain.model.Clients.kunAguero;
 import static com.baluwo.challenge.domain.model.Clients.leoMessi;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.vavr.control.Option.none;
 import static java.lang.String.format;
 import static java.net.URI.create;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +33,7 @@ public class ClientControllerTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void clientShouldBeRegistered() {
+    public void clientShouldBeAdded() {
         when(service.add(new ClientInfo(leoMessi.name()))).thenReturn(leoMessi);
         ResponseEntity<String> response = restTemplate.exchange(
                 post(create("/clients"))
@@ -53,7 +53,7 @@ public class ClientControllerTest {
     @Test
     public void clientCanBeUpdatedIfExists() {
         when(service.update(leoMessi.id(), new ClientInfo(kunAguero.name())))
-                .thenReturn(Optional.of(leoMessi.withInfo(new ClientInfo(kunAguero.name()))));
+                .thenReturn(Option.of(leoMessi.withInfo(new ClientInfo(kunAguero.name()))));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         put(create(format("/clients/%s", leoMessi.id())))
@@ -72,7 +72,7 @@ public class ClientControllerTest {
 
     @Test
     public void clientCannotBeUpdatedIfNotExists() {
-        when(service.update(leoMessi.id(), new ClientInfo(kunAguero.name()))).thenReturn(Optional.empty());
+        when(service.update(leoMessi.id(), new ClientInfo(kunAguero.name()))).thenReturn(none());
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         put(create(format("/clients/%s", leoMessi.id())))
@@ -88,7 +88,7 @@ public class ClientControllerTest {
 
     @Test
     public void clientCanBeRemovedIfExists() {
-        when(service.remove(leoMessi.id())).thenReturn(Optional.of(leoMessi));
+        when(service.remove(leoMessi.id())).thenReturn(Option.of(leoMessi));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         delete(create(format("/clients/%s", leoMessi.id())))
@@ -106,7 +106,7 @@ public class ClientControllerTest {
 
     @Test
     public void clientCannotBeRemovedIfNotExists() {
-        when(service.remove(leoMessi.id())).thenReturn(Optional.empty());
+        when(service.remove(leoMessi.id())).thenReturn(none());
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         delete(create(format("/clients/%s", leoMessi.id())))
@@ -138,7 +138,7 @@ public class ClientControllerTest {
 
     @Test
     public void clientShouldBeFoundIfExists() {
-        when(service.find(leoMessi.id())).thenReturn(Optional.of(leoMessi));
+        when(service.find(leoMessi.id())).thenReturn(Option.of(leoMessi));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         get(create(format("/clients/%s", leoMessi.id()))).accept(APPLICATION_JSON).build(),
@@ -154,7 +154,7 @@ public class ClientControllerTest {
 
     @Test
     public void clientShouldBeMissingIfNotExists() {
-        when(service.find(leoMessi.id())).thenReturn(Optional.empty());
+        when(service.find(leoMessi.id())).thenReturn(none());
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         get(create(format("/clients/%s", leoMessi.id()))).accept(APPLICATION_JSON).build(),

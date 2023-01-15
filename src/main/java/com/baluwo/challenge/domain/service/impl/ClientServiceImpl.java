@@ -4,14 +4,15 @@ import com.baluwo.challenge.domain.model.Client;
 import com.baluwo.challenge.domain.model.ClientInfo;
 import com.baluwo.challenge.domain.persistence.impl.ClientList;
 import com.baluwo.challenge.domain.service.ClientService;
+import io.vavr.control.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
+import static io.vavr.control.Option.ofOptional;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 
@@ -19,7 +20,6 @@ import static java.util.UUID.randomUUID;
 public class ClientServiceImpl implements ClientService {
 
     private final Logger logger = LoggerFactory.getLogger(ClientServiceImpl.class);
-
     private final ClientList list;
 
     @Autowired
@@ -35,7 +35,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Optional<Client> update(UUID id, ClientInfo info) {
+    public Option<Client> update(UUID id, ClientInfo info) {
         return find(id).map(client -> {
             Client updated = list.save(client.withInfo(info));
             logger.info(format("Client %s successfully updated", updated));
@@ -44,7 +44,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Optional<Client> remove(UUID id) {
+    public Option<Client> remove(UUID id) {
         return find(id).map(client -> {
             list.deleteById(client.id());
             logger.info(format("Client %s successfully removed", client));
@@ -58,8 +58,8 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Optional<Client> find(UUID id) {
-        return list.findById(id);
+    public Option<Client> find(UUID id) {
+        return ofOptional(list.findById(id));
     }
 
 }

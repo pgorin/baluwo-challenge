@@ -55,4 +55,11 @@ public class Product {
         return Objects.hash(id);
     }
 
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", details=" + details +
+                '}';
+    }
 }

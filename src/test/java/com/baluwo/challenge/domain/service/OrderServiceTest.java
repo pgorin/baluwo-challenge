@@ -39,7 +39,7 @@ public class OrderServiceTest {
         this.sellers = sellers;
         this.offers = offers;
         this.registry = registry;
-        this.service = new OrderServiceImpl(this.inventory, this.clients, this.sellers, this.offers, this.registry);
+        this.service = new OrderServiceImpl(this.clients, this.offers, this.registry);
     }
 
     @Test

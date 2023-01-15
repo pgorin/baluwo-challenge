@@ -53,7 +53,7 @@ public class ClientControllerTest {
     @Test
     public void clientCanBeUpdatedIfExists() {
         when(service.update(leoMessi.id(), new ClientInfo(kunAguero.name())))
-                .thenReturn(Option.of(leoMessi.withInfo(new ClientInfo(kunAguero.name()))));
+                .thenReturn(Option.some(leoMessi.withInfo(new ClientInfo(kunAguero.name()))));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         put(create(format("/clients/%s", leoMessi.id())))
@@ -88,7 +88,7 @@ public class ClientControllerTest {
 
     @Test
     public void clientCanBeRemovedIfExists() {
-        when(service.remove(leoMessi.id())).thenReturn(Option.of(leoMessi));
+        when(service.remove(leoMessi.id())).thenReturn(Option.some(leoMessi));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         delete(create(format("/clients/%s", leoMessi.id())))
@@ -138,7 +138,7 @@ public class ClientControllerTest {
 
     @Test
     public void clientShouldBeFoundIfExists() {
-        when(service.find(leoMessi.id())).thenReturn(Option.of(leoMessi));
+        when(service.find(leoMessi.id())).thenReturn(Option.some(leoMessi));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         get(create(format("/clients/%s", leoMessi.id()))).accept(APPLICATION_JSON).build(),

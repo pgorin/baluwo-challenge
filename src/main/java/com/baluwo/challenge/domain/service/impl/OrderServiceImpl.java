@@ -21,6 +21,7 @@ import static io.vavr.API.For;
 import static io.vavr.control.Option.ofOptional;
 import static io.vavr.control.Try.failure;
 import static io.vavr.control.Try.success;
+import static java.lang.String.format;
 import static java.util.function.Function.identity;
 
 @Service
@@ -53,17 +54,31 @@ public class OrderServiceImpl implements OrderService {
                             .collect(Collectors.toList())
             ).yield().toList();
             return (Try<Order>) maybeOffers.find(Try::isFailure).fold(
-                    () -> success(
-                            registry.save(
-                                    maybeOffers.foldLeft(
-                                            new Order(UUID.randomUUID(), client, OffsetDateTime.now()),
-                                            (builder, item) -> builder.withOffer(item.get()._1, item.get()._2)
-                                    )
-                            )
-                    ),
+                    () -> {
+                        Order added = registry.save(
+                                maybeOffers.foldLeft(
+                                        new Order(UUID.randomUUID(), client, OffsetDateTime.now()),
+                                        (builder, item) -> builder.withOffer(item.get()._1, item.get()._2)
+                                )
+                        );
+                        logger.info(format("Order %s successfully added", added));
+                        return success(added);
+                    },
                     identity()
             );
         }).getOrElse(failure(new ClientNotFound(request.client())));
+    }
+
+    @Override
+    public Try<Order> approve(UUID orderId, OrderApproval approval) {
+        return ofOptional(registry.findById(orderId)).fold(
+                () -> failure(new OrderNotFound(orderId)),
+                order -> order.approve(approval).map(approved -> {
+                    registry.save(approved);
+                    logger.info(format("Offer %s successfully approved", approved));
+                    return approved;
+                })
+        );
     }
 
     @Override

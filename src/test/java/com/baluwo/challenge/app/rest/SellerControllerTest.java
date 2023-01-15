@@ -53,7 +53,7 @@ public class SellerControllerTest {
     @Test
     public void sellerCanBeUpdatedIfExists() {
         when(service.update(apple.id(), new SellerInfo(sony.name())))
-                .thenReturn(Option.of(apple.withInfo(new SellerInfo(sony.name()))));
+                .thenReturn(Option.some(apple.withInfo(new SellerInfo(sony.name()))));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         put(create(format("/sellers/%s", apple.id())))
@@ -88,7 +88,7 @@ public class SellerControllerTest {
 
     @Test
     public void sellerCanBeRemovedIfExists() {
-        when(service.remove(apple.id())).thenReturn(Option.of(apple));
+        when(service.remove(apple.id())).thenReturn(Option.some(apple));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         delete(create(format("/sellers/%s", apple.id())))
@@ -138,7 +138,7 @@ public class SellerControllerTest {
 
     @Test
     public void sellerShouldBeFoundIfExists() {
-        when(service.find(apple.id())).thenReturn(Option.of(apple));
+        when(service.find(apple.id())).thenReturn(Option.some(apple));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         get(create(format("/sellers/%s", apple.id()))).accept(APPLICATION_JSON).build(),

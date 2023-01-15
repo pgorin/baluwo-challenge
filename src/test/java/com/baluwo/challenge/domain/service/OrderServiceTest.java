@@ -9,12 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static com.baluwo.challenge.domain.model.Clients.kunAguero;
 import static com.baluwo.challenge.domain.model.Clients.leoMessi;
 import static com.baluwo.challenge.domain.model.Products.iphone11;
 import static com.baluwo.challenge.domain.model.Products.playstation5;
 import static com.baluwo.challenge.domain.model.Sellers.apple;
 import static com.baluwo.challenge.domain.model.Sellers.sony;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.time.OffsetDateTime.now;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -83,6 +86,7 @@ public class OrderServiceTest {
         sellers.save(apple);
         inventory.save(iphone11);
         offers.save(new Offer(apple, iphone11, new Price(100)));
+
         Try<Throwable> failure = service.register(
                 new OrderRequest(
                         leoMessi.id(),
@@ -93,6 +97,41 @@ public class OrderServiceTest {
                 )
         ).failed();
         assertTrue(failure.exists(ex -> ex instanceof OfferNotFound));
+    }
+
+    @Test
+    void orderCanBeApproved() {
+        clients.save(leoMessi);
+        sellers.save(apple);
+        sellers.save(sony);
+        inventory.save(iphone11);
+        inventory.save(playstation5);
+        Offer offer = offers.save(new Offer(apple, iphone11, new Price(100)));
+        Order order = registry.save(new Order(randomUUID(), leoMessi, now()).withOffer(offer, 1));
+
+        Order approved = service.approve(order.id(), new OrderApproval(kunAguero.name(), now())).get();
+        assertThat(registry.findById(approved.id())).hasValue(approved);
+    }
+
+    @Test
+    void approvalShouldFailIfOrderNotExists() {
+        Try<Throwable> failure = service.approve(randomUUID(), new OrderApproval(kunAguero.name(), now())).failed();
+        assertTrue(failure.exists(ex -> ex instanceof OrderNotFound));
+    }
+
+    @Test
+    void approvalShouldFailIfOrderAlreadyApproved() {
+        clients.save(leoMessi);
+        sellers.save(apple);
+        sellers.save(sony);
+        inventory.save(iphone11);
+        inventory.save(playstation5);
+        Offer offer = offers.save(new Offer(apple, iphone11, new Price(100)));
+        Order order = registry.save(new Order(randomUUID(), leoMessi, now()).withOffer(offer, 1));
+        service.approve(order.id(), new OrderApproval(kunAguero.name(), now())).get();
+
+        Try<Throwable> failure = service.approve(order.id(), new OrderApproval(leoMessi.name(), now())).failed();
+        assertTrue(failure.exists(ex -> ex instanceof OrderAlreadyApproved));
     }
 
     @AfterEach

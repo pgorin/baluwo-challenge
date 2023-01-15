@@ -1,6 +1,8 @@
 package com.baluwo.challenge.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
@@ -8,6 +10,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+
+import static io.vavr.control.Try.success;
 
 @Entity
 @Table(name = "orders")
@@ -20,13 +24,14 @@ public class Order {
     @JoinColumn(name = "client_id", nullable = false)
     @JsonProperty
     private Client client;
-    @Column(nullable = false)
+    @Column(name = "date_time", nullable = false)
     @JsonProperty
     private OffsetDateTime dateTime;
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonProperty
     private Set<OrderOffer> offers;
-
+    @Embedded
+    private OrderApproval approval;
 
     // required due reflection
     private Order() {
@@ -37,6 +42,7 @@ public class Order {
         this.client = client;
         this.dateTime = dateTime;
         this.offers = new HashSet<>();
+        this.approval = null;
     }
 
     public UUID id() {
@@ -55,9 +61,23 @@ public class Order {
         return offers;
     }
 
+    public Option<OrderApproval> approval() {
+        return Option.of(approval);
+    }
+
     public Order withOffer(Offer offer, Integer quantity) {
         this.offers.add(new OrderOffer(this, offer, quantity));
         return this;
+    }
+
+    public Try<Order> approve(OrderApproval approval) {
+        return this.approval().fold(
+                () -> {
+                    this.approval = approval;
+                    return success(this);
+                },
+                current -> Try.failure(new OrderAlreadyApproved(current))
+        );
     }
 
     @Override
@@ -80,6 +100,7 @@ public class Order {
                 ", client=" + client +
                 ", dateTime=" + dateTime +
                 ", offers=" + offers +
+                ", approval=" + approval +
                 '}';
     }
 }

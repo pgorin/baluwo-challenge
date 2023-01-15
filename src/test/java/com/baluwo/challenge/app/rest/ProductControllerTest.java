@@ -59,7 +59,7 @@ public class ProductControllerTest {
     @Test
     public void productCanBeUpdatedIfExists() {
         when(service.update(playstation5.id(), new ProductDetails(iphone11.name())))
-                .thenReturn(Option.of(playstation5.withDetails(new ProductDetails(iphone11.name()))));
+                .thenReturn(Option.some(playstation5.withDetails(new ProductDetails(iphone11.name()))));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         put(create(format("/products/%s", playstation5.id())))
@@ -94,7 +94,7 @@ public class ProductControllerTest {
 
     @Test
     public void productCanBeRemovedIfExists() {
-        when(service.remove(playstation5.id())).thenReturn(Option.of(playstation5));
+        when(service.remove(playstation5.id())).thenReturn(Option.some(playstation5));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         delete(create(format("/products/%s", playstation5.id())))
@@ -144,7 +144,7 @@ public class ProductControllerTest {
 
     @Test
     public void productShouldBeFoundIfExists() {
-        when(service.find(playstation5.id())).thenReturn(Option.of(playstation5));
+        when(service.find(playstation5.id())).thenReturn(Option.some(playstation5));
         ResponseEntity<String> response =
                 restTemplate.exchange(
                         get(create(format("/products/%s", playstation5.id()))).accept(APPLICATION_JSON).build(),

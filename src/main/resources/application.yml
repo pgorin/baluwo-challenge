@@ -8,5 +8,5 @@ spring:
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://localhost/baluwo_challenge
-    username: postgres
-    password: postgres
+    username:
+    password:

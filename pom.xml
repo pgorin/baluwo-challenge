@@ -16,7 +16,7 @@
     <name>challenge</name>
 
     <url>https://github.com/GrowAndFit/challenge</url>
-    <description>Coding CHallenge</description>
+    <description>Coding Challenge</description>
     <inceptionYear>2020</inceptionYear>
 
     <scm>
@@ -35,9 +35,11 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <start-class>com.baluwo.challenge.Application</start-class>
-        <joda-time-version>2.10.5</joda-time-version>
-        <jadira-usertype-version>6.0.1.GA</jadira-usertype-version>
+        <joda-time.version>2.10.5</joda-time.version>
+        <jadira-usertype.version>6.0.1.GA</jadira-usertype.version>
         <guava.version>28.2-jre</guava.version>
+        <jackson-datatype.version>2.13.3</jackson-datatype.version>
+        <springdoc-openapi.version>1.6.14</springdoc-openapi.version>
     </properties>
 
     <dependencies>
@@ -62,19 +64,20 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
-            <optional>true</optional>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.hibernate</groupId>-->
+<!--            <artifactId>hibernate-jpamodelgen</artifactId>-->
+<!--            <optional>true</optional>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
+            <version>${joda-time.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jadira.usertype</groupId>
             <artifactId>usertype.core</artifactId>
-            <version>${jadira-usertype-version}</version>
+            <version>${jadira-usertype.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -90,8 +93,34 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson-datatype.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-data-rest</artifactId>
+            <version>${springdoc-openapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc-openapi.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.24.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

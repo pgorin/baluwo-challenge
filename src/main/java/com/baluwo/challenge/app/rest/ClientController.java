@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 import static java.lang.String.format;
@@ -50,7 +51,7 @@ public class ClientController {
             }
     )
     @PostMapping()
-    public ResponseEntity<?> add(@RequestBody ClientInfo info) throws JsonProcessingException {
+    public ResponseEntity<?> add(@RequestBody @Valid ClientInfo info) throws JsonProcessingException {
         logger.info("Adding new client...");
         return status(CREATED).body(service.add(info));
     }
@@ -78,7 +79,7 @@ public class ClientController {
     @PutMapping("{id}")
     public ResponseEntity<?> update(@PathVariable("id")
                                     @Parameter(description = "Id of the client to be updated") UUID id,
-                                    @RequestBody ClientInfo info) {
+                                    @RequestBody @Valid ClientInfo info) {
         logger.info(format("Updating client with id %s...", id));
         return of(service.update(id, info).toJavaOptional());
     }

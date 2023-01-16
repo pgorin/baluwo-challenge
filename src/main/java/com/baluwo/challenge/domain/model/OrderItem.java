@@ -1,16 +1,22 @@
 package com.baluwo.challenge.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-import java.util.Objects;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
+@ToString
+@EqualsAndHashCode
 public class OrderItem {
-    @JsonProperty
+    @NotNull(message = "INVALID_SELLER")
     private final UUID seller;
-    @JsonProperty
+    @NotNull(message = "INVALID_PRODUCT")
     private final UUID product;
-    @JsonProperty
+    @NotNull(message = "INVALID_QUANTITY")
+    @Min(value = 1, message = "INVALID_QUANTITY")
     private final Integer quantity;
 
     public OrderItem(UUID seller, UUID product, Integer quantity) {
@@ -19,37 +25,19 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
+    @JsonProperty
     public UUID seller() {
         return seller;
     }
 
+    @JsonProperty
     public UUID product() {
         return product;
     }
 
+    @JsonProperty
     public Integer quantity() {
         return quantity;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderItem orderItem = (OrderItem) o;
-        return seller.equals(orderItem.seller) && product.equals(orderItem.product) && quantity.equals(orderItem.quantity);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(seller, product, quantity);
-    }
-
-    @Override
-    public String toString() {
-        return "OrderItem{" +
-                "seller=" + seller +
-                ", product=" + product +
-                ", quantity=" + quantity +
-                '}';
-    }
 }

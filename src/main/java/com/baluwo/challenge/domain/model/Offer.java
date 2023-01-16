@@ -1,6 +1,8 @@
 package com.baluwo.challenge.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -9,9 +11,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "offers")
+@ToString
+@EqualsAndHashCode
 public class Offer {
 
     @Embeddable
+    @ToString
+    @EqualsAndHashCode
     public static class Id implements Serializable {
 
         @Column(name = "seller_id")
@@ -32,18 +38,6 @@ public class Offer {
             this(seller.id(), product.id());
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Id id = (Id) o;
-            return sellerId.equals(id.sellerId) && productId.equals(id.productId);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sellerId, productId);
-        }
     }
 
 
@@ -51,14 +45,11 @@ public class Offer {
     private Id id;
     @ManyToOne
     @MapsId("seller_id")
-    @JsonProperty
     private Seller seller;
     @ManyToOne
     @MapsId("product_id")
-    @JsonProperty
     private Product product;
     @Embedded
-    @JsonProperty
     private Price price;
 
     // required due reflection
@@ -76,37 +67,19 @@ public class Offer {
         return id;
     }
 
+    @JsonProperty
     public Seller seller() {
         return seller;
     }
 
+    @JsonProperty
     public Product product() {
         return product;
     }
 
+    @JsonProperty
     public Price price() {
         return price;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Offer offer = (Offer) o;
-        return id.equals(offer.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Offer{" +
-                "seller=" + seller +
-                ", product=" + product +
-                ", price=" + price +
-                '}';
-    }
 }

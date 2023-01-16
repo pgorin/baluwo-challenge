@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 import static java.lang.String.format;
@@ -49,7 +50,7 @@ public class OrderController {
             }
     )
     @PostMapping()
-    public ResponseEntity<?> register(@RequestBody OrderRequest request) throws JsonProcessingException {
+    public ResponseEntity<?> register(@RequestBody @Valid OrderRequest request) throws JsonProcessingException {
         logger.info("Registering new order...");
         return service.register(request)
                 .map(order -> status(CREATED).body((Object) order))
@@ -86,7 +87,7 @@ public class OrderController {
     @PostMapping("{id}/approval")
     public ResponseEntity<?> approve(@PathVariable("id")
                                      @Parameter(description = "Id of the order to be approved") UUID order,
-                                     @RequestBody OrderApproval approval) {
+                                     @RequestBody @Valid OrderApproval approval) {
         logger.info(format("Approving order %s...", order));
         return service.approve(order, approval)
                 .map(approved -> ok((Object) approved))

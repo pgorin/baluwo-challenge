@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 import static java.lang.String.format;
@@ -49,7 +50,7 @@ public class ProductController {
             }
     )
     @PostMapping()
-    public ResponseEntity<?> add(@RequestBody ProductDetails details) throws JsonProcessingException {
+    public ResponseEntity<?> add(@RequestBody @Valid ProductDetails details) throws JsonProcessingException {
         logger.info("Adding new product...");
         return status(CREATED).body(service.add(details));
     }
@@ -77,7 +78,7 @@ public class ProductController {
     @PutMapping("{id}")
     public ResponseEntity<?> update(@PathVariable("id")
                                     @Parameter(description = "Id of the product to be updated") UUID id,
-                                    @RequestBody ProductDetails details) {
+                                    @RequestBody @Valid ProductDetails details) {
         logger.info(format("Updating product with id %s...", id));
         return of(service.update(id, details).toJavaOptional());
     }
@@ -192,7 +193,7 @@ public class ProductController {
                                    @Parameter(description = "Id of the offered product") UUID product,
                                    @RequestParam("seller")
                                    @Parameter(description = "Id of the offered seller") UUID seller,
-                                   @RequestBody Price price) {
+                                   @RequestBody @Valid Price price) {
         logger.info(format("Adding new offer for product %s and seller %s...", product, seller));
         return service.offer(product, seller, price)
                 .map(offer -> status(CREATED).body((Object) offer))

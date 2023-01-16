@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 
 import static com.baluwo.challenge.domain.model.Clients.kunAguero;
@@ -81,7 +82,7 @@ public class OrderControllerTest {
                         apple.name(),
                         iphone11.id(),
                         iphone11.name(),
-                        100,
+                        new BigDecimal("100.00"),
                         2
                 ),
                 response.getBody()
@@ -180,7 +181,7 @@ public class OrderControllerTest {
                         apple.name(),
                         iphone11.id(),
                         iphone11.name(),
-                        100,
+                        new BigDecimal("100.00"),
                         2,
                         kunAguero.name(),
                         clock.instant().atOffset(UTC)

@@ -3,32 +3,33 @@ package com.baluwo.challenge.domain.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import static io.vavr.control.Try.failure;
 import static io.vavr.control.Try.success;
 
 @Entity
 @Table(name = "orders")
+@ToString
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Order {
 
     @Id
-    @JsonProperty
+    @EqualsAndHashCode.Include
     private UUID id;
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
-    @JsonProperty
     private Client client;
     @Column(name = "date_time", nullable = false)
-    @JsonProperty
     private OffsetDateTime dateTime;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonProperty
     private Set<OrderOffer> offers;
     @Embedded
     @JsonProperty
@@ -47,18 +48,22 @@ public class Order {
         this.approval = null;
     }
 
+    @JsonProperty
     public UUID id() {
         return id;
     }
 
+    @JsonProperty
     public Client client() {
         return client;
     }
 
+    @JsonProperty
     public OffsetDateTime dateTime() {
         return dateTime;
     }
 
+    @JsonProperty
     public Set<OrderOffer> offers() {
         return offers;
     }
@@ -78,31 +83,8 @@ public class Order {
                     this.approval = approval;
                     return success(this);
                 },
-                current -> Try.failure(new OrderAlreadyApproved(current))
+                current -> failure(new OrderAlreadyApproved(current))
         );
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Order client = (Order) o;
-        return id.equals(client.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "id=" + id +
-                ", client=" + client +
-                ", dateTime=" + dateTime +
-                ", offers=" + offers +
-                ", approval=" + approval +
-                '}';
-    }
 }

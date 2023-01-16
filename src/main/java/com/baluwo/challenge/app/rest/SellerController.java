@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 import static java.lang.String.format;
@@ -50,7 +51,7 @@ public class SellerController {
             }
     )
     @PostMapping()
-    public ResponseEntity<?> add(@RequestBody SellerInfo info) throws JsonProcessingException {
+    public ResponseEntity<?> add(@RequestBody @Valid SellerInfo info) throws JsonProcessingException {
         logger.info("Adding new seller...");
         return status(CREATED).body(service.add(info));
     }
@@ -78,7 +79,7 @@ public class SellerController {
     @PutMapping("{id}")
     public ResponseEntity<?> update(@PathVariable("id")
                                     @Parameter(description = "Id of the seller to be updated") UUID id,
-                                    @RequestBody SellerInfo info) {
+                                    @RequestBody @Valid SellerInfo info) {
         logger.info(format("Updating seller with id %s...", id));
         return of(service.update(id, info).toJavaOptional());
     }

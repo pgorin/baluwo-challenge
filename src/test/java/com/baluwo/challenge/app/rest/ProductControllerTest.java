@@ -14,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
+
 import static com.baluwo.challenge.domain.model.Products.iphone11;
 import static com.baluwo.challenge.domain.model.Products.playstation5;
 import static com.baluwo.challenge.domain.model.Sellers.apple;
@@ -187,7 +189,7 @@ public class ProductControllerTest {
         assertEquals(
                 format(
                         "[{\"seller\":{\"id\":\"%s\",\"name\":\"%s\"},\"product\":{\"id\":\"%s\",\"name\":\"%s\"},\"price\":{\"amount\":%s}}]",
-                        apple.id(), apple.name(), iphone11.id(), iphone11.name(), 100
+                        apple.id(), apple.name(), iphone11.id(), iphone11.name(), new BigDecimal("100.00")
                 ),
                 response.getBody()
         );

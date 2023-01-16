@@ -1,15 +1,21 @@
 package com.baluwo.challenge.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import java.util.Objects;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Embeddable
+@ToString
+@EqualsAndHashCode
 public class SellerInfo {
     @Column(nullable = false)
-    @JsonProperty
+    @NotNull(message = "INVALID_NAME")
+    @Size(min = 3, max = 255, message = "INVALID_NAME")
     private String name;
 
     // required due reflection
@@ -20,27 +26,9 @@ public class SellerInfo {
         this.name = name;
     }
 
+    @JsonProperty
     public String name() {
         return name;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SellerInfo that = (SellerInfo) o;
-        return name.equals(that.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
-    }
-
-    @Override
-    public String toString() {
-        return "SellerInfo{" +
-                "name='" + name + '\'' +
-                '}';
-    }
 }

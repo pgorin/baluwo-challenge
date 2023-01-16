@@ -1,19 +1,22 @@
 package com.baluwo.challenge.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "order_offers")
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class OrderOffer implements Serializable {
 
     @Embeddable
+    @EqualsAndHashCode
     public static class Id implements Serializable {
-
         @Column(name = "order_id")
         private UUID orderId;
         @Column(name = "seller_id")
@@ -35,39 +38,27 @@ public class OrderOffer implements Serializable {
             this(order.id(), seller.id(), product.id());
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Id that = (Id) o;
-            return orderId.equals(that.orderId) && sellerId.equals(that.sellerId) && productId.equals(that.productId);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(orderId, sellerId, productId);
-        }
-
     }
 
     @EmbeddedId
+    @EqualsAndHashCode.Include
     private Id id;
     @ManyToOne
     @MapsId("order_id")
     private Order order;
     @ManyToOne
     @MapsId("seller_id")
-    @JsonProperty
+    @ToString.Include
     private Seller seller;
     @ManyToOne
     @MapsId("product_id")
-    @JsonProperty
+    @ToString.Include
     private Product product;
     @Embedded
-    @JsonProperty
+    @ToString.Include
     private Price price;
     @Column(nullable = false)
-    @JsonProperty
+    @ToString.Include
     private Integer quantity;
 
     private OrderOffer() {
@@ -86,30 +77,24 @@ public class OrderOffer implements Serializable {
         return order;
     }
 
+    @JsonProperty
     public Seller seller() {
         return seller;
     }
 
+    @JsonProperty
     public Product product() {
         return product;
     }
 
+    @JsonProperty
     public Price price() {
         return price;
     }
 
+    @JsonProperty
     public Integer quantity() {
         return quantity;
     }
 
-    @Override
-    public String toString() {
-        return "OrderOffer{" +
-                "id=" + id +
-                ", seller=" + seller +
-                ", product=" + product +
-                ", price=" + price +
-                ", quantity=" + quantity +
-                '}';
-    }
 }

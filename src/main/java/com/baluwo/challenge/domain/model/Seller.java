@@ -1,20 +1,23 @@
 package com.baluwo.challenge.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "sellers")
+@ToString
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Seller {
 
     @Id
-    @JsonProperty
+    @EqualsAndHashCode.Include
     private UUID id;
     @Embedded
     private SellerInfo info;
@@ -28,6 +31,7 @@ public class Seller {
         this.info = info;
     }
 
+    @JsonProperty
     public UUID id() {
         return id;
     }
@@ -42,24 +46,4 @@ public class Seller {
         return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Seller client = (Seller) o;
-        return id.equals(client.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Seller{" +
-                "id=" + id +
-                ", info=" + info +
-                '}';
-    }
 }

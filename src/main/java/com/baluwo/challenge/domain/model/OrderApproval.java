@@ -1,19 +1,20 @@
 package com.baluwo.challenge.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.time.OffsetDateTime;
-import java.util.Objects;
 
 @Embeddable
+@ToString
+@EqualsAndHashCode
 public class OrderApproval {
     @Column()
-    @JsonProperty
     private String approver;
     @Column(name = "approval_date_time")
-    @JsonProperty
     private OffsetDateTime dateTime;
 
     // required due reflection
@@ -25,32 +26,14 @@ public class OrderApproval {
         this.dateTime = dateTime;
     }
 
+    @JsonProperty
     public String approver() {
         return approver;
     }
 
+    @JsonProperty
     public OffsetDateTime dateTime() {
         return dateTime;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderApproval that = (OrderApproval) o;
-        return Objects.equals(approver, that.approver) && Objects.equals(dateTime, that.dateTime);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(approver, dateTime);
-    }
-
-    @Override
-    public String toString() {
-        return "OrderApproval{" +
-                "approver='" + approver + '\'' +
-                ", dateTime=" + dateTime +
-                '}';
-    }
 }

@@ -1,12 +1,10 @@
 package com.baluwo.challenge.app.rest;
 
-import com.baluwo.challenge.domain.model.ClientNotFound;
-import com.baluwo.challenge.domain.model.OfferNotFound;
-import com.baluwo.challenge.domain.model.Order;
-import com.baluwo.challenge.domain.model.OrderRequest;
+import com.baluwo.challenge.domain.model.*;
 import com.baluwo.challenge.domain.service.OrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.*;
 
 @RestController
@@ -55,6 +55,43 @@ public class OrderController {
                 .map(order -> status(CREATED).body((Object) order))
                 .recover(ClientNotFound.class, ex -> badRequest().body(ex.getCause()))
                 .recover(OfferNotFound.class, ex -> badRequest().body(ex.getCause()))
+                .getOrElseGet(ex -> status(INTERNAL_SERVER_ERROR).body(ex.getCause()));
+    }
+
+    @Operation(summary = "Approve an order")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Approved order",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = Order.class)
+                                    )
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Order not found",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "Order already approved",
+                            content = @Content
+                    )
+            }
+    )
+    @PostMapping("{id}/approval")
+    public ResponseEntity<?> approve(@PathVariable("id")
+                                     @Parameter(description = "Id of the order to be approved") UUID order,
+                                     @RequestBody OrderApproval approval) {
+        logger.info(format("Approving order %s...", order));
+        return service.approve(order, approval)
+                .map(approved -> ok((Object) approved))
+                .recover(OrderNotFound.class, ex -> notFound().build())
+                .recover(OrderAlreadyApproved.class, ex -> status(CONFLICT).body(ex.getCause()))
                 .getOrElseGet(ex -> status(INTERNAL_SERVER_ERROR).body(ex.getCause()));
     }
 

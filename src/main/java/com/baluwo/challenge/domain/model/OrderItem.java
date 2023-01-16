@@ -2,6 +2,7 @@ package com.baluwo.challenge.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class OrderItem {
@@ -28,5 +29,27 @@ public class OrderItem {
 
     public Integer quantity() {
         return quantity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderItem orderItem = (OrderItem) o;
+        return seller.equals(orderItem.seller) && product.equals(orderItem.product) && quantity.equals(orderItem.quantity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(seller, product, quantity);
+    }
+
+    @Override
+    public String toString() {
+        return "OrderItem{" +
+                "seller=" + seller +
+                ", product=" + product +
+                ", quantity=" + quantity +
+                '}';
     }
 }

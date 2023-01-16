@@ -31,6 +31,8 @@ public class Order {
     @JsonProperty
     private Set<OrderOffer> offers;
     @Embedded
+    @JsonProperty
+    // TODO using nullable instead of Option due unresolved hibernate mapping
     private OrderApproval approval;
 
     // required due reflection
